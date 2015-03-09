@@ -18,9 +18,9 @@ def main():
     are not propagated accurately.
     """
     # configuration
-    channel = 'eeg_cat4_8TeV'
-    mH = 120
-    procs = ['ggH', 'qqH', 'WH', 'ZH', 'ttH']
+    channel = 'gj_cat0_8TeV'
+    mH = 2000
+    procs = ['gj']
 
     f = ROOT.TFile('../output/for_visualizations.root')
 
@@ -35,7 +35,7 @@ def main():
     bgrfit = f.Get(channel + '/fit_hDataObs')
 
     cname = 'background_{0}'.format(channel)
-    draw(bgr, bgrfit, cname, channel, 'data 2012, 19.7 fb^{-1}')
+    draw(bgr, bgrfit, cname, channel, 'data 2012, 2.0 fb^{-1}')
 
     # signals
     for proc in procs:
@@ -61,6 +61,9 @@ def draw(histo, fit, cname, title, legtxt):
     # top pad
     pad1.cd()
     pad1.SetGridx()
+    if 'Data' in legtxt:
+        pad1.SetLogy()
+    
     pad1.SetGridy()
     pad1.SetTopMargin(0.07)
     pad1.SetBottomMargin(0)
@@ -81,8 +84,10 @@ def draw(histo, fit, cname, title, legtxt):
     gr.GetHistogram().SetTitleSize(0.037, 'XY')
     gr.GetHistogram().SetLabelSize(0.037, 'XY')
     gr.GetHistogram().SetTitleOffset(0.7, 'Y')
-    gr.GetHistogram().SetAxisRange(90, 190, 'X')
-    gr.GetHistogram().SetAxisRange(0, histo.GetMaximum() * 1.15, 'Y')
+    gr.GetHistogram().SetAxisRange(500, 3700, 'X')
+    gr.GetHistogram().SetAxisRange(0, histo.GetMaximum() * 1.2, 'Y')
+    if 'Data' in histo:
+        gr.GetHistogram().SetAxisRange(0, histo.GetMaximum() * 1.5, 'Y')
     gr.Draw('APZ')
 
     fit.SetLineColor(ROOT.kRed)
@@ -136,21 +141,21 @@ def draw(histo, fit, cname, title, legtxt):
     grRat.GetHistogram().SetTitleSize(0.085, 'XY')
     grRat.GetHistogram().SetLabelSize(0.09, 'XY')
     grRat.GetHistogram().SetTitleOffset(0.3, 'Y')
-    grRat.GetHistogram().SetAxisRange(90, 190, 'X')
+    grRat.GetHistogram().SetAxisRange(500, 3700, 'X')
     grRat.GetHistogram().SetAxisRange(0, 2, 'Y')
     grRat.GetYaxis().SetNdivisions(5, 5, 1)
     grRat.Draw('APZ')
 
     # fit with a constant
-    fit = ROOT.TF1('fit', '[0]', 100, 190)
+    fit = ROOT.TF1('fit', '[0]', 100, 3000)
     fit.SetParameter(0, 1)
     fit.SetLineWidth(1)
-    grRat.Fit(fit, 'QEM', 'same', 100, 190)
+    grRat.Fit(fit, 'QEM', 'same', 100, 3000)
 
     # legend
     leg = ROOT.TLegend(0.48, 0.25, 0.97, 0.36)
     saves.append(leg)
-    fmt = 'Average in [100, 190]: {0:.3f} #pm {1:.3f}'
+    fmt = 'Average in [500, 3500]: {0:.3f} #pm {1:.3f}'
     leg.AddEntry(fit, fmt.format(fit.GetParameter(0), fit.GetParError(0)), 'l')
     leg.SetFillColor(0)
     leg.Draw('same')
